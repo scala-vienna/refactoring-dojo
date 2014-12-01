@@ -12,11 +12,10 @@ case class Pos(x: Int, y: Int)
 
 class GameOfLife {
 
-  //// PRoperties
+  //// PRoperties / Fields
   var size: Int = 0
   var live_cells: Seq[Pos] = ArrayBuffer[Pos]()
 
-  
   //// Initializator from String
   def from_string(in: String) = {
 
@@ -85,6 +84,8 @@ class GameOfLife {
       j = j + 1
     }
 
+    //// Copy found live-cells to instance field
+    
     i = 0;
     live_cells.asInstanceOf[ArrayBuffer[Pos]].clear()
     while (i < x_arr.size) {
@@ -107,7 +108,21 @@ class GameOfLife {
       for {
         x <- 1 until size
       } yield {
-        if (will_have_live_cell_at(Pos(x, y)))
+        //// Conditions
+        var c1 = {
+          // enough neighbours to live on?
+          val nc1 = neighbours_count_for(Pos(x, y))
+          nc1 == 2 || nc1 == 3
+        }
+        var c2 = has_live_cell_at(Pos(x, y))
+        var c4 = {
+          // enough for new cell to be born?
+          var nc2 = neighbours_count_for(Pos(x, y))
+          nc2 == 3
+        }
+        //// React to conditions
+        var c3 = if (c2) c1 else c4
+        if (c3)
           new_cells.append(Pos(x, y))
         else
           Pos(x, y)
@@ -119,15 +134,25 @@ class GameOfLife {
       live_cells.asInstanceOf[ArrayBuffer[Pos]].append(new_cells.toList.apply(j))
       j = j + 1;
     }
-    
-    
+
   }
 
-  // TODO: uglyfy
   def has_live_cell_at(pos: Pos): Boolean = {
-    live_cells.exists(some_cell_pos => some_cell_pos == pos)
+    try {
+      var i = 0;
+      while (i < live_cells.size) {
+        var c = live_cells(i)
+        if (c.x == pos.x && c.y == pos.y) {
+          throw new RuntimeException("found!")
+        }
+        i = i + 1;
+      }
+    } catch {
+      case _: RuntimeException => return true;
+    }
+    return false;
   }
-  
+
   def to_str = {
     var i = 0;
     var l = "";
@@ -146,27 +171,6 @@ class GameOfLife {
       i = i + 1;
     }
     l.substring(0, l.size - 1)
-  }
-
-  // TODO: uglyfy
-  private def will_have_live_cell_at(pos: Pos): Boolean = {
-    if (has_live_cell_at(pos)) {
-      will_cell_live_on_at(pos)
-    } else {
-      will_new_cell_be_born_at(pos)
-    }
-  }
-
-  // TODO: uglyfy
-  private def will_cell_live_on_at(pos: Pos): Boolean = {
-    val neighbours = neighbours_count_for(pos)
-    neighbours == 2 || neighbours == 3
-  }
-
-  // TODO: uglyfy
-  private def will_new_cell_be_born_at(pos: Pos): Boolean = {
-    val neighbours = neighbours_count_for(pos)
-    neighbours == 3
   }
 
   private def neighbours_count_for(pos: Pos): Int = {
