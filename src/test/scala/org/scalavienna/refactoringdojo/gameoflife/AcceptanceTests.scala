@@ -84,9 +84,9 @@ trait TestGameCalculator {
    * Ideally, it should consist of just one or two calls.
    * */
   def calculate(in: String): String = {
-    val world = new GameOfLife()
+    val world = new GoL()
     world.from_string ( in )
-    world.next_iteration
+    world.calcNxtIter
     world.to_str
   }
   
@@ -94,6 +94,7 @@ trait TestGameCalculator {
 
 /**
  * You may NOT change the code in this trait
+ * (at least not if it leads to cheating).
  * */
 trait AcceptanceTester extends TestGameCalculator { self: FunSuite with Matchers =>
 

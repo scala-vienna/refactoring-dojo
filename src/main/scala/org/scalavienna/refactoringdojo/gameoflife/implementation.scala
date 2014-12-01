@@ -1,20 +1,25 @@
 package org.scalavienna.refactoringdojo.gameoflife
 
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.Map
 
 /**
  * You can change ANYTHING you want here (and you *really* should!)
  * Feel free to use other concepts, other names, approaches, etc.
  * Feel free to change the file-structure as well (use more files, etc.)
+ * Feel free to introduce new classes, case-classes, objects, etc.
+ * Finally, feel free to refactor intensively!
  */
+class GoL {
 
-case class Pos(x: Int, y: Int)
-
-class GameOfLife {
+  // This Map should have keys "x" and "y"!!!
+  // It is used to store coordinates.
+  // They are 1-based.
+  type Pos = Map[String, Int]
 
   //// PRoperties / Fields
   var size: Int = 0
-  var live_cells: Seq[Pos] = ArrayBuffer[Pos]()
+  var live_cells: Seq[Map[String, Int]] = ArrayBuffer[Map[String, Int]]()
 
   //// Initializator from String
   def from_string(in: String) = {
@@ -91,13 +96,14 @@ class GameOfLife {
     while (i < x_arr.size) {
       var x = x_arr(i)
       var y = y_arr(i)
-      live_cells.asInstanceOf[ArrayBuffer[Pos]] += Pos(x, y)
+      live_cells.asInstanceOf[ArrayBuffer[Pos]] += Map[String, Int]("x" -> x, "y" -> y)
       i = i + 1
     }
 
   }
 
-  def next_iteration {
+  // Calculate next iterartion
+  def calcNxtIter {
     var new_cells = ArrayBuffer[Pos]()
     var i = 0;
     var j = 0;
@@ -111,21 +117,21 @@ class GameOfLife {
         //// Conditions
         var c1 = {
           // enough neighbours to live on?
-          val nc1 = neighbours_count_for(Pos(x, y))
+          val nc1 = countAround(Map[String, Int]("x" -> x, "y" -> y))
           nc1 == 2 || nc1 == 3
         }
-        var c2 = has_live_cell_at(Pos(x, y))
+        var c2 = livcell(Map[String, Int]("x" -> x, "y" -> y))
         var c4 = {
           // enough for new cell to be born?
-          var nc2 = neighbours_count_for(Pos(x, y))
+          var nc2 = countAround(Map[String, Int]("x" -> x, "y" -> y))
           nc2 == 3
         }
         //// React to conditions
-        var c3 = if (c2) c1 else c4
+        var c3 = if (c2 == 1) c1 else c4
         if (c3)
-          new_cells.append(Pos(x, y))
+          new_cells.append(Map[String, Int]("x" -> x, "y" -> y))
         else
-          Pos(x, y)
+          Map[String, Int]("x" -> x, "y" -> y)
       }
     }
     //// Copy to existing instance
@@ -137,22 +143,25 @@ class GameOfLife {
 
   }
 
-  def has_live_cell_at(pos: Pos): Boolean = {
+  // Is there a live cell at the given position?
+  // If yes, returns 1
+  def livcell(p: Pos): Int = {
     try {
       var i = 0;
       while (i < live_cells.size) {
         var c = live_cells(i)
-        if (c.x == pos.x && c.y == pos.y) {
+        if (c("x") == p("x") && c("y") == p("y")) {
           throw new RuntimeException("found!")
         }
         i = i + 1;
       }
     } catch {
-      case _: RuntimeException => return true;
+      case _: RuntimeException => return 1;
     }
-    return false;
+    return -1;
   }
 
+  // Produce a formatted world
   def to_str = {
     var i = 0;
     var l = "";
@@ -160,91 +169,102 @@ class GameOfLife {
       var j = 0;
       while (j < size) {
         var c = '_';
-        this.has_live_cell_at(Pos(j + 1, i + 1)) match {
-          case true => c = 'O'
-          case false => c = '.'
+        this.livcell(Map[String, Int]("x" -> (j + 1), "y" -> (i + 1))) match {
+          case 1 => c = 'O'
+          case -1 => c = '.'
+          case _ => {}
         }
         l = s"$l$c";
         j = j + 1;
       }
-      l = l + '\n'
+      l = s"$l\n"
       i = i + 1;
     }
+    // Remove last \n
     l.substring(0, l.size - 1)
   }
 
-  private def neighbours_count_for(pos: Pos): Int = {
-    var p1 = Pos(pos.x - 1, pos.y - 1);
-    var p2 = Pos(pos.x + 0, pos.y - 1);
-    var p3 = Pos(pos.x + 1, pos.y - 1);
-    var p4 = Pos(pos.x - 1, pos.y + 0);
-    var p5 = Pos(pos.x + 1, pos.y + 0);
-    var p6 = Pos(pos.x - 1, pos.y + 1);
-    var p7 = Pos(pos.x + 0, pos.y + 1);
-    var p8 = Pos(pos.x + 1, pos.y + 1);
+  // Count live neighbours aroud position
+  private def countAround(p: Pos): Int = {
+    var p1 = Map[String, Int]("x" -> (p("x") - 1), "y" -> (p("y") - 1));
+    var p2 = Map[String, Int]("x" -> (p("x") + 0), "y" -> (p("y") - 1));
+    var p3 = Map[String, Int]("x" -> (p("x") + 1), "y" -> (p("y") - 1));
+    var p4 = Map[String, Int]("x" -> (p("x") - 1), "y" -> (p("y") + 0));
+    var p5 = Map[String, Int]("x" -> (p("x") + 1), "y" -> (p("y") + 0));
+    var p6 = Map[String, Int]("x" -> (p("x") - 1), "y" -> (p("y") + 1));
+    var p7 = Map[String, Int]("x" -> (p("x") + 0), "y" -> (p("y") + 1));
+    var p8 = Map[String, Int]("x" -> (p("x") + 1), "y" -> (p("y") + 1));
 
-    var with_wor_arr = ArrayBuffer[Pos]()
+    // target for positions within world
+    var with_wor_arr = ArrayBuffer[Map[String, Int]]()
 
-    if (within_world(p1))
+    // Filter positions within world
+    
+    if (within(p1) >= 0)
       with_wor_arr += p1
-    if (within_world(p2))
+    if (within(p2) >= 0)
       with_wor_arr += p2
-    if (within_world(p3))
+    if (!(within(p3) < 0))
       with_wor_arr += p3
-    if (within_world(p4))
+    if (within(p4) >= 0)
       with_wor_arr += p4
-    if (within_world(p5))
+    if (within(p5) == 0)
       with_wor_arr += p5
-    if (within_world(p6))
+    if (within(p6) >= 0)
       with_wor_arr += p6
-    if (within_world(p7))
+    if (within(p7) >= 0)
       with_wor_arr += p7
-    if (within_world(p8))
+    if (within(p8) >= 0)
       with_wor_arr += p8
 
+    // target for neighbour count
     var nc = 0;
+    
+    // Count live neighbours
 
-    if (has_live_cell_at(p1))
+    if (livcell(p1) == 1)
       nc = nc + 1
-    if (has_live_cell_at(p2))
+    if (livcell(p2) > 0)
       nc = nc + 1
-    if (has_live_cell_at(p3))
+    if (livcell(p3) > 0)
       nc = nc + 1
-    if (has_live_cell_at(p4))
+    if (livcell(p4) == 1)
       nc = nc + 1
-    if (has_live_cell_at(p5))
+    if (livcell(p5) > 0)
       nc = nc + 1
-    if (has_live_cell_at(p6))
+    if (livcell(p6) == 1)
       nc = nc + 1
-    if (has_live_cell_at(p7))
+    if (livcell(p7) == 1)
       nc = nc + 1
-    if (has_live_cell_at(p8))
+    if (livcell(p8) == 1)
       nc = nc + 1
 
     return nc;
   }
 
-  private def within_world(pos: Pos): Boolean = {
-    if (pos.y > 0) {
-      if (pos.y > 1 || pos.y == 1) {
-        if (pos.y < size || pos.y == size) {
-          if (!(pos.x <= 0)) {
-            if (pos.x > 1 || pos.x == 1) {
-              return if (pos.x < size || pos.x == size) true else false;
+  // Is the position within world / board?
+  // If yes, returns 0.
+  private def within(pos: Pos): Int = {
+    if (pos("y") > 0) {
+      if (pos("y") > 1 || pos("y") == 1) {
+        if (pos("y") < size || pos("y") == size) {
+          if (!(pos("x") <= 0)) {
+            if (pos("x") > 1 || pos("x") == 1) {
+              return if (pos("x") < size || pos("x") == size) 0 else -1;
             } else {
-              return false;
+              return -2;
             }
           } else {
-            return false;
+            return -3;
           }
         } else {
-          return false;
+          -4;
         }
       } else {
-        return false;
+        return -5;
       }
     } else {
-      return false;
+      return -6;
     }
   }
 
