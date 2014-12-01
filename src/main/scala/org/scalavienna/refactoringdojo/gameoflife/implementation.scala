@@ -10,11 +10,11 @@ import scala.collection.mutable.ArrayBuffer
 
 case class Pos(x: Int, y: Int)
 
-class World {
+class GameOfLife {
 
   //// PRoperties
   var size: Int = 0
-  var live_cells: Seq[Pos] = Seq()
+  var live_cells: Seq[Pos] = ArrayBuffer[Pos]()
 
   
   //// Initializator from String
@@ -85,24 +85,22 @@ class World {
       j = j + 1
     }
 
-    var lc_arr = ArrayBuffer[Pos]()
     i = 0;
+    live_cells.asInstanceOf[ArrayBuffer[Pos]].clear()
     while (i < x_arr.size) {
       var x = x_arr(i)
       var y = y_arr(i)
-      lc_arr += Pos(x, y)
+      live_cells.asInstanceOf[ArrayBuffer[Pos]] += Pos(x, y)
       i = i + 1
     }
 
-    live_cells = lc_arr.toSeq
-
   }
 
-  def next_iteration: World = {
-    val new_world = new World()
-    new_world.size = this.size
-    new_world.live_cells = ArrayBuffer[Pos]()
+  def next_iteration {
+    var new_cells = ArrayBuffer[Pos]()
     var i = 0;
+    var j = 0;
+    //// Calculate new cells
     while (i < size) {
       i = i + 1;
       var y = i;
@@ -110,13 +108,19 @@ class World {
         x <- 1 until size
       } yield {
         if (will_have_live_cell_at(Pos(x, y)))
-          new_world.live_cells.asInstanceOf[ArrayBuffer[Pos]].append(Pos(x, y))
+          new_cells.append(Pos(x, y))
         else
           Pos(x, y)
       }
     }
-    new_world.live_cells = new_world.live_cells.toSeq
-    new_world
+    //// Copy to existing instance
+    live_cells.asInstanceOf[ArrayBuffer[Pos]].clear()
+    while (j < new_cells.size) {
+      live_cells.asInstanceOf[ArrayBuffer[Pos]].append(new_cells.toList.apply(j))
+      j = j + 1;
+    }
+    
+    
   }
 
   // TODO: uglyfy
