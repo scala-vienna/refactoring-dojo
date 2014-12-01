@@ -96,17 +96,23 @@ class World {
   }
 
   def next_iteration: World = {
-    val future_living_cells =
-      for {
-        y <- 1 until size
-        x <- 1 until size
-        if will_have_live_cell_at(Pos(x, y))
-      } yield {
-        Pos(x, y)
-      }
     val new_world = new World()
     new_world.size = this.size
-    new_world.live_cells = future_living_cells
+    new_world.live_cells = ArrayBuffer[Pos]()
+    var i = 0;
+    while (i < size) {
+      i = i + 1;
+      var y = i;
+      for {
+        x <- 1 until size
+      } yield {
+        if (will_have_live_cell_at(Pos(x, y)))
+          new_world.live_cells.asInstanceOf[ArrayBuffer[Pos]].append(Pos(x, y))
+        else
+          Pos(x, y)
+      }
+    }
+    new_world.live_cells = new_world.live_cells.toSeq
     new_world
   }
 
