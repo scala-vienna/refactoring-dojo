@@ -84,7 +84,8 @@ trait TestGameCalculator {
    * Ideally, it should consist of just one or two calls.
    * */
   def calculate(in: String): String = {
-    val world = WorldParser.from_string ( in )
+    val world = new World()
+    world.from_string ( in )
     WorldFormatter.format ( world.next_iteration )
   }
   

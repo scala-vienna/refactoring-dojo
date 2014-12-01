@@ -3,39 +3,111 @@ package org.scalavienna.refactoringdojo.gameoflife
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * You can change ANYTHING you want here.
+ * You can change ANYTHING you want here (and you *really* should!)
  * Feel free to use other concepts, other names, approaches, etc.
  * Feel free to change the file-structure as well (use more files, etc.)
  */
 
-case class Pos(x: Int, y: Int) {
-  def surrounding_positions: Seq[Pos] = {
-    val deltas =
-      Seq(
-        (-1, -1), (+0, -1), (+1, -1),
-        (-1, +0), /*     */ (+1, +0),
-        (-1, +1), (+0, +1), (+1, +1))
-    deltas.map {
-      case (delta_x, delta_y) =>
-        Pos(x + delta_x, y + delta_y)
+case class Pos(x: Int, y: Int)
+
+class World {
+
+  var size: Int = 0
+  var live_cells: Seq[Pos] = Seq()
+
+  def from_string(in: String) = {
+
+    //// Some helper variables
+
+    var s = 0;
+    var j = 0;
+    var l = ""
+    var i = 0;
+    var c = 'x';
+
+    var lines: Array[String] = Array()
+
+    //// Parse lines
+
+    var ss1 = in.split("\n")
+    var ss2 = ArrayBuffer[String]()
+    while (i < ss1.size) {
+      l = ss1(i)
+      l = l.trim()
+      ss2.appendAll(Seq(l))
+      i = i + 1
     }
+
+    lines = ss2.toArray
+
+    //// Calculate size of world from lines
+
+    i = 0;
+    while (i < lines.size) {
+      l = lines(i)
+      j = 0;
+      s = 0;
+      while (j < l.size) {
+        j = j + 1;
+      }
+      s = j
+      i = i + 1;
+    }
+    size = s
+
+    //// Find live-cell positions from lines
+
+    var x_arr = ArrayBuffer[Int]()
+    var y_arr = ArrayBuffer[Int]()
+    var dead_cells = 0
+
+    j = 0;
+    while (j < lines.size) {
+      i = 0;
+      l = lines(j)
+      while (i < l.size) {
+        c = l.charAt(i)
+        if (c == 'O') {
+          x_arr.append(i + 1)
+          if (c == 'O') {
+            y_arr.append(j + 1)
+          } else {
+            dead_cells += 1
+          }
+        } else {
+          dead_cells += 1
+        }
+        i = i + 1
+      }
+      j = j + 1
+    }
+
+    var lc_arr = ArrayBuffer[Pos]()
+    i = 0;
+    while (i < x_arr.size) {
+      var x = x_arr(i)
+      var y = y_arr(i)
+      lc_arr += Pos(x, y)
+      i = i + 1
+    }
+
+    live_cells = lc_arr.toSeq
+
   }
-}
-
-case class World(size: Int, live_cells: Seq[Pos]) {
-
-  val range = 1 until size
 
   def next_iteration: World = {
     val future_living_cells =
       for {
-        y <- range
-        x <- range
+        y <- 1 until size
+        x <- 1 until size
         if will_have_live_cell_at(Pos(x, y))
       } yield {
         Pos(x, y)
       }
-    World(size, future_living_cells)
+    val new_world = new World()
+    new_world.size = this.size
+    new_world.live_cells = future_living_cells
+    new_world
   }
 
   def has_live_cell_at(pos: Pos): Boolean = {
@@ -61,52 +133,78 @@ case class World(size: Int, live_cells: Seq[Pos]) {
   }
 
   private def neighbours_count_for(pos: Pos): Int = {
-    val candidates = pos.surrounding_positions
-    candidates.filter(within_world).count(has_live_cell_at)
+    var p1 = Pos(pos.x - 1, pos.y - 1);
+    var p2 = Pos(pos.x + 0, pos.y - 1);
+    var p3 = Pos(pos.x + 1, pos.y - 1);
+    var p4 = Pos(pos.x - 1, pos.y + 0);
+    var p5 = Pos(pos.x + 1, pos.y + 0);
+    var p6 = Pos(pos.x - 1, pos.y + 1);
+    var p7 = Pos(pos.x + 0, pos.y + 1);
+    var p8 = Pos(pos.x + 1, pos.y + 1);
+
+    var with_wor_arr = ArrayBuffer[Pos]()
+
+    if (within_world(p1))
+      with_wor_arr += p1
+    if (within_world(p2))
+      with_wor_arr += p2
+    if (within_world(p3))
+      with_wor_arr += p3
+    if (within_world(p4))
+      with_wor_arr += p4
+    if (within_world(p5))
+      with_wor_arr += p5
+    if (within_world(p6))
+      with_wor_arr += p6
+    if (within_world(p7))
+      with_wor_arr += p7
+    if (within_world(p8))
+      with_wor_arr += p8
+
+    var nc = 0;
+
+    if (has_live_cell_at(p1))
+      nc = nc + 1
+    if (has_live_cell_at(p2))
+      nc = nc + 1
+    if (has_live_cell_at(p3))
+      nc = nc + 1
+    if (has_live_cell_at(p4))
+      nc = nc + 1
+    if (has_live_cell_at(p5))
+      nc = nc + 1
+    if (has_live_cell_at(p6))
+      nc = nc + 1
+    if (has_live_cell_at(p7))
+      nc = nc + 1
+    if (has_live_cell_at(p8))
+      nc = nc + 1
+
+    return nc;
   }
 
   private def within_world(pos: Pos): Boolean = {
-    range.contains(pos.y) && range.contains(pos.x)
-  }
-
-}
-
-object WorldParser {
-
-  def from_string(in: String): World = {
-    val lines = parse_lines(in)
-    val size = get_size(lines)
-
-    val live_cells = ArrayBuffer[Pos]()
-
-    for {
-      (line, y) <- lines.zipWithIndex
-      (ch, x) <- line.zipWithIndex
-    } {
-      if (ch == 'O')
-        live_cells += Pos(x + 1, y + 1)
+    if (pos.y > 0) {
+      if (pos.y > 1 || pos.y == 1) {
+        if (pos.y < size || pos.y == size) {
+          if (!(pos.x <= 0)) {
+            if (pos.x > 1 || pos.x == 1) {
+              return if (pos.x < size || pos.x == size) true else false;
+            } else {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
     }
-
-    new World(size, live_cells)
-  }
-
-  private def get_size(lines: Seq[String]): Int = {
-    val w = get_width(lines)
-    val h = get_height(lines)
-    assert(w == h, s"Width and height should be equal (w: $w, h: $h)")
-    w
-  }
-
-  private def get_width(lines: Seq[String]): Int = {
-    lines.head.size
-  }
-
-  private def get_height(lines: Seq[String]): Int = {
-    lines.size
-  }
-
-  private def parse_lines(str: String): Seq[String] = {
-    str.split("\n").map(_.trim())
   }
 
 }
@@ -114,12 +212,23 @@ object WorldParser {
 object WorldFormatter {
 
   def format(world: World): String = {
-    val charLines = for (y <- 1 to world.size) yield {
-      for (x <- 1 to world.size) yield {
-        if (world.has_live_cell_at(Pos(x, y))) 'O' else '.'
+    var i = 0;
+    var l = "";
+    while (i < world.size) {
+      var j = 0;
+      while (j < world.size) {
+        var c = '_';
+        world.has_live_cell_at(Pos(j + 1, i + 1)) match {
+          case true => c = 'O'
+          case false => c = '.'
+        }
+        l = s"$l$c";
+        j = j + 1;
       }
+      l = l + '\n'
+      i = i + 1;
     }
-    charLines.map(_.mkString).mkString("\n")
+    l.substring(0, l.size - 1)
   }
 
 }
