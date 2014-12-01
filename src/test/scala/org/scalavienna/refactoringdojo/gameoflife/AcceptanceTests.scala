@@ -86,7 +86,7 @@ trait TestGameCalculator {
   def calculate(in: String): String = {
     val world = new World()
     world.from_string ( in )
-    WorldFormatter.format ( world.next_iteration )
+    world.next_iteration.to_str
   }
   
 }

@@ -12,9 +12,12 @@ case class Pos(x: Int, y: Int)
 
 class World {
 
+  //// PRoperties
   var size: Int = 0
   var live_cells: Seq[Pos] = Seq()
 
+  
+  //// Initializator from String
   def from_string(in: String) = {
 
     //// Some helper variables
@@ -116,10 +119,32 @@ class World {
     new_world
   }
 
+  // TODO: uglyfy
   def has_live_cell_at(pos: Pos): Boolean = {
     live_cells.exists(some_cell_pos => some_cell_pos == pos)
   }
+  
+  def to_str = {
+    var i = 0;
+    var l = "";
+    while (i < this.size) {
+      var j = 0;
+      while (j < size) {
+        var c = '_';
+        this.has_live_cell_at(Pos(j + 1, i + 1)) match {
+          case true => c = 'O'
+          case false => c = '.'
+        }
+        l = s"$l$c";
+        j = j + 1;
+      }
+      l = l + '\n'
+      i = i + 1;
+    }
+    l.substring(0, l.size - 1)
+  }
 
+  // TODO: uglyfy
   private def will_have_live_cell_at(pos: Pos): Boolean = {
     if (has_live_cell_at(pos)) {
       will_cell_live_on_at(pos)
@@ -128,11 +153,13 @@ class World {
     }
   }
 
+  // TODO: uglyfy
   private def will_cell_live_on_at(pos: Pos): Boolean = {
     val neighbours = neighbours_count_for(pos)
     neighbours == 2 || neighbours == 3
   }
 
+  // TODO: uglyfy
   private def will_new_cell_be_born_at(pos: Pos): Boolean = {
     val neighbours = neighbours_count_for(pos)
     neighbours == 3
@@ -215,26 +242,3 @@ class World {
 
 }
 
-object WorldFormatter {
-
-  def format(world: World): String = {
-    var i = 0;
-    var l = "";
-    while (i < world.size) {
-      var j = 0;
-      while (j < world.size) {
-        var c = '_';
-        world.has_live_cell_at(Pos(j + 1, i + 1)) match {
-          case true => c = 'O'
-          case false => c = '.'
-        }
-        l = s"$l$c";
-        j = j + 1;
-      }
-      l = l + '\n'
-      i = i + 1;
-    }
-    l.substring(0, l.size - 1)
-  }
-
-}
