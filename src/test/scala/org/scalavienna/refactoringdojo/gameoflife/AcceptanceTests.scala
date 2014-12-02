@@ -7,7 +7,7 @@ import scala.Array.canBuildFrom
 import scala.Array.fallbackCanBuildFrom
 
 /**
- * Generally, don't remove test-cases. You are free to add though.
+ * As a general rule, don't remove test-cases. You are free to add, though.
  * However, consider these as acceptance tests. No need to be exhaustive here.
  * 
  * Rely on your own unit-tests for in-depth coverage of your components.
@@ -50,7 +50,7 @@ class AcceptanceTests extends FunSuite with Matchers with AcceptanceTester {
                ....""")
   }
 
-  test("Acceptance test (includes all rules)") {
+  test("Acceptance test (covers all rules)") {
     assertGoL(
       in = """ O...
                .O..
@@ -81,7 +81,7 @@ trait TestGameCalculator {
    * delegating as much as possible to your own
    * components.
    * 
-   * Ideally, it should consist of just one or two calls.
+   * Ideally, it should consist of just one or two lines.
    * */
   def calculate(in: String): String = {
     val world = new GoL()
@@ -93,8 +93,8 @@ trait TestGameCalculator {
 }
 
 /**
- * You may NOT change the code in this trait
- * (at least not if it leads to cheating).
+ * You should not need to change anything here.
+ * Try to leave this trait as-is.
  * */
 trait AcceptanceTester extends TestGameCalculator { self: FunSuite with Matchers =>
 

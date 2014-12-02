@@ -8,20 +8,20 @@ import scala.collection.mutable.Map
  * Feel free to use other concepts, other names, approaches, etc.
  * Feel free to change the file-structure as well (use more files, etc.)
  * Feel free to introduce new classes, case-classes, objects, etc.
- * Finally, feel free to refactor intensively!
+ * Finally: refactor mercilessly!
  */
 class GoL {
 
-  // This Map should have keys "x" and "y"!!!
+  // This Map should have only keys "x" and "y"!!!
   // It is used to store coordinates.
   // They are 1-based.
   type Pos = Map[String, Int]
 
-  //// PRoperties / Fields
+  //// Properties / Fields
   var size: Int = 0
   var live_cells: Seq[Map[String, Int]] = ArrayBuffer[Map[String, Int]]()
 
-  //// Initializator from String
+  //// Initialization from String
   def from_string(in: String) = {
 
     //// Some helper variables
@@ -90,7 +90,7 @@ class GoL {
     }
 
     //// Copy found live-cells to instance field
-    
+
     i = 0;
     live_cells.asInstanceOf[ArrayBuffer[Pos]].clear()
     while (i < x_arr.size) {
@@ -102,7 +102,7 @@ class GoL {
 
   }
 
-  // Calculate next iterartion
+  // Calculate next iteration
   def calcNxtIter {
     var new_cells = ArrayBuffer[Pos]()
     var i = 0;
@@ -120,21 +120,28 @@ class GoL {
           val nc1 = countAround(Map[String, Int]("x" -> x, "y" -> y))
           nc1 == 2 || nc1 == 3
         }
+        // has currently cell at position?
         var c2 = livcell(Map[String, Int]("x" -> x, "y" -> y))
         var c4 = {
           // enough for new cell to be born?
           var nc2 = countAround(Map[String, Int]("x" -> x, "y" -> y))
           nc2 == 3
         }
-        //// React to conditions
-        var c3 = if (c2 == 1) c1 else c4
+        //// c3: Will cell be added?
+        var c3 = true
+
+        if (c2 == 1) {
+          c3 = c1
+        } else
+          c3 = c4
+
         if (c3)
           new_cells.append(Map[String, Int]("x" -> x, "y" -> y))
         else
           Map[String, Int]("x" -> x, "y" -> y)
       }
     }
-    //// Copy to existing instance
+    //// Copy cells to existing instance
     live_cells.asInstanceOf[ArrayBuffer[Pos]].clear()
     while (j < new_cells.size) {
       live_cells.asInstanceOf[ArrayBuffer[Pos]].append(new_cells.toList.apply(j))
@@ -145,13 +152,13 @@ class GoL {
 
   // Is there a live cell at the given position?
   // If yes, returns 1
-  def livcell(p: Pos): Int = {
+  private def livcell(p: Pos): Int = {
     try {
       var i = 0;
       while (i < live_cells.size) {
         var c = live_cells(i)
         if (c("x") == p("x") && c("y") == p("y")) {
-          throw new RuntimeException("found!")
+          throw new RuntimeException("found!") // break from loop
         }
         i = i + 1;
       }
@@ -184,7 +191,7 @@ class GoL {
     l.substring(0, l.size - 1)
   }
 
-  // Count live neighbours aroud position
+  // Count live neighbours around position
   private def countAround(p: Pos): Int = {
     var p1 = Map[String, Int]("x" -> (p("x") - 1), "y" -> (p("y") - 1));
     var p2 = Map[String, Int]("x" -> (p("x") + 0), "y" -> (p("y") - 1));
@@ -198,8 +205,8 @@ class GoL {
     // target for positions within world
     var with_wor_arr = ArrayBuffer[Map[String, Int]]()
 
-    // Filter positions within world
-    
+    // Filter positions which are within world
+
     if (within(p1) >= 0)
       with_wor_arr += p1
     if (within(p2) >= 0)
@@ -219,7 +226,7 @@ class GoL {
 
     // target for neighbour count
     var nc = 0;
-    
+
     // Count live neighbours
 
     if (livcell(p1) == 1)
