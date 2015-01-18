@@ -65,7 +65,8 @@ class AcceptanceTests extends FunSuite with Matchers with AcceptanceTester {
 }
 
 /**
- * You may only change the calculate method.
+ * You may only change the *implementation* of the "calculate" 
+ * method, NOT the type signature. Don't add methods here.
  */
 trait TestGameCalculator {
   
@@ -73,6 +74,11 @@ trait TestGameCalculator {
    * This method is the bridge between the input
    * of the acceptance-tests and your real implementation
    * of the game-of-life algorithm.
+   * 
+   * It should accept a String like as in the in = """...
+   * and produce a next iteration as expressed in the 
+   * exp = """... 
+   * ("in" stands for "input", "exp" stands for "expected").
    *  
    * You may change the code inside this method (you
    * will actually have to). But leave the signature as-is.
@@ -94,7 +100,7 @@ trait TestGameCalculator {
 
 /**
  * You should not need to change anything here.
- * Try to leave this trait as-is.
+ * Try to leave this trait as-is. It's an implementation detail.
  * */
 trait AcceptanceTester extends TestGameCalculator { self: FunSuite with Matchers =>
 
