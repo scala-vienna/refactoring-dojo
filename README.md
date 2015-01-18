@@ -6,6 +6,44 @@ You will find an implemented coding kata (e.g. Conway's game of life) together w
 
 Your task is to refactor the implementation and produce a much nicer code-base. The acceptance-tests are there to guide you and let you know if you broke anything.
 
+# Setup
+
+## SBT
+
+Be sure to [install SBT locally](http://www.scala-sbt.org/0.13/tutorial/index.html) on your machine.
+
+You will need SBT 0.13. Refer to installation instructions here:
+
+http://www.scala-sbt.org/0.13/tutorial/index.html
+
+## Git
+
+In order to checkout / clone this project you will probably want to use git.
+
+Find a suitable version for your operating system.
+
+## Trying it out
+
+Make sure everything works by executing
+
+```
+sbt test
+```
+
+on the project's directory.
+
+When run for the very first time, it will take a while until all dependencies are downloaded and prepared.
+
+For the "setupcheck" branch, all tests will fail. This is normal. It's just about checking the setup. You should see something like:
+
+```
+[info] Run completed in 324 milliseconds.
+[info] Total number of tests run: 4
+[info] Suites: completed 1, aborted 0
+[info] Tests: succeeded 0, failed 4, canceled 0, ignored 0, pending 0
+[info] *** 4 TESTS FAILED ***
+```
+
 # Included Katas
 
 ## Game of Life
