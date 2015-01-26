@@ -61,7 +61,7 @@ class AcceptanceTests extends FunSuite with Matchers with AcceptanceTester {
                .O..
                ....""")
   }
-  
+
   test("A cell with more than 3 neighbours dies") {
     assertGoL(
       in = """ ....
@@ -73,7 +73,7 @@ class AcceptanceTests extends FunSuite with Matchers with AcceptanceTester {
                O.O.
                OOO.""")
   }
-  
+
   test("A cell is born if it had 3 neighbours") {
     assertGoL(
       in = """ O...
@@ -85,6 +85,15 @@ class AcceptanceTests extends FunSuite with Matchers with AcceptanceTester {
                ....
                ....""")
   }
+
+//  // FIX: this causes the test to fail 
+//  test("A cell is born outside") {
+//    assertGoL(
+//      in = """ OOO 
+//               ...""",
+//      exp = """.O. 
+//               .O.""")
+//  }
 
 }
 
